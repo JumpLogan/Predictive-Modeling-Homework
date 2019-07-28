@@ -1,0 +1,36 @@
+---
+title: "Take Home Exams"
+author: "Logan Liu (gl22453)"
+date: "7/16/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Book Problems
+### Chapter 2: #10
+
+```{r, echo=FALSE}
+
+library(MASS)
+attach(Boston)
+?Boston
+pairs(Boston)
+
+#proportion of owner-occupied units built prior to 1940.
+#nitrogen oxides concentration (parts per 10 million).
+#average number of rooms per dwelling.
+#weighted mean of distances to five Boston employment centres.
+#index of accessibility to radial highways.
+
+dim(subset(Boston), chas == 1)
+
+```
+
+## Chapter 3: #15
+
+```{r pressure, echo=FALSE}
+pairs(pressure)
+```
