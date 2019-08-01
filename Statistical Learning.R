@@ -391,6 +391,3 @@ points(test[,3:2], col=predmap(near$fitted), pch=19, cex=1)
 map('state', 'california')
 mtext("Residuals (k=9)",cex=2) 
 points(test[,3:2], col=residmap(res), pch=19, cex=1)
-
-
-

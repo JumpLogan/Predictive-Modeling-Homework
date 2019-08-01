@@ -1,19 +1,16 @@
-Tele = read.table("Tele.txt",header=T)
-attach(Tele)
+###################################################
+## Fit a regression tree to default.payment.next.month~PAY_0 in the data.
+## The tree is plotted as well as a plot of the corresponding step function
+## fit to the data.
+###################################################
+library(tree)
 
-Model1 = lm(calls~months)
-summary(Model1)
+Creditcard = read.csv('UCI_Credit_Card.csv', header=TRUE)
+summary(Creditcard)
 
-plot(months,Model1$res,pch=19,cex=1.5,xlab="months",ylab="Std. Res")
-
-
-months2 = months^2
-Model2 = lm(calls~months+months2)
-summary(Model2)
+#first get a big tree using a small value of mindev
+temp = tree(default.payment.next.month~PAY_0,data=Creditcard,mindev=.0001)
+cat('first big tree size: \n')
+print(length(unique(temp$where)))
 
 
-plot(months,Model2$res,pch=19,cex=1.5,xlab="months",ylab="Std. Res")
-
-plot(months,calls,pch=19,cex=1.5,col=4)
-lines(months,Model2$fitted,lwd=2,col=3)
-lines(months,Model1$fitted,lwd=2,col=2)
