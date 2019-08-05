@@ -1,38 +1,469 @@
 ---
 title: "Take Home Exams"
 author: "Logan Liu (gl22453)"
-date: "8/6/2019"
+date: "8/9/2019"
 output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 ```
-
 ## Book Problems
 ### Chapter 2: #10
+(a) dim(Boston)  
+The Boston data frame has 506 rows and 14 columns.  
+This data frame contains the following columns:
+crim
+per capita crime rate by town.
+zn
+proportion of residential land zoned for lots over 25,000 sq.ft.
+indus
+proportion of non-retail business acres per town.
+chas
+Charles River dummy variable (= 1 if tract bounds river; 0 otherwise).
+nox
+nitrogen oxides concentration (parts per 10 million).
+rm
+average number of rooms per dwelling.
+age
+proportion of owner-occupied units built prior to 1940.
+dis
+weighted mean of distances to five Boston employment centres.
+rad
+index of accessibility to radial highways.
+tax
+full-value property-tax rate per \$10,000.
+ptratio
+pupil-teacher ratio by town.
+black
+1000(Bk - 0.63)^2 where Bk is the proportion of blacks by town.
+lstat
+lower status of the population (percent).
+medv
+median value of owner-occupied homes in \$1000s.
+(b) Nitrogen oxides concentration, lower status of the population, proportion of owner-occupied units built prior to 1940, and proportion of non-retail business acres per town are all predictors of proportion of residential land zoned for lots over 25,000 sq.ft.
 
 ```{r, echo=FALSE}
-library(MASS) ## a library of example datasets
-library(class) ## a library with lots of classification tools
-library(kknn) ## knn library
-
-
+library(MASS)
 attach(Boston)
-n = dim(Boston)[1]
-
-plot(lstat,medv)
-
+par(mfrow = c(2, 2))
+plot(Boston$nox, Boston$zn)
+plot(Boston$lstat, Boston$zn)
+plot(Boston$age, Boston$zn)
+plot(Boston$indus, Boston$zn)
 ```
+(c) There is a relationship between crim and nox, rm, age, dis, lstat and medv.  
+Crime rate is high when high nitrogen oxides concentration, low average number of rooms per dwelling, high tax rate, short distances to five Boston employment centres, little proportion of owner-occupied units built prior to 1940.  
+
+```{r, echo=FALSE}
+pairs(Boston[Boston$crim < 20, ])
+```
+(d) There are 18 suburbs with high crime rates more than 20.  
+When tax is 666, there is a very high crime rate.  
+The higher pupil-teacher ratios, the higher crime rate. But not very correlated.  
+```{r, echo=FALSE}
+par(mfrow=c(1,3))
+hist(Boston$crim[Boston$crim>1], breaks=20)
+hist(Boston$tax, breaks=25)
+hist(Boston$ptratio, breaks=25)
+```
+(e) 35  
+(f) 19.05   
+(g) t(subset(Boston, medv == min(Boston$medv)))  
+The suburb with the lowest median value is 398. Relative to the other towns, this suburb has high crim, zn below quantile 75%, above mean indus, does not bound the Charles river, above mean nox, rm below quantile 25%, maximum age, dis near to the minimum value, maximum rad, tax and ptratio in quantile 75%, black maximum and lstat above quantile 75%.    
+(h) 64  
+13  
+crim is lower, indus proportion is lower, lstat is lower.  
+```{r, echo=FALSE}
+summary(subset(Boston, rm > 8))
+```    
 
 ### Chapter 3: #15
- Test
-```{r pressure, echo=FALSE}
+(a) Every predictor except chas has a statistically significant association with crim.  
+```{r , echo=FALSE}
+fit.chas <- lm(crim ~ chas)
+summary(fit.chas)
+plot(fit.chas)
+```
 
+(b) We can reject the null-hypothesis for “zn”, “dis”, “rad”, “black” and “medv”. Because their p values are less than 0.05.
+```{r , echo=FALSE}
+summary(lm(formula = crim ~ ., data = Boston))
+```
+
+(c) It differs significantly between the individual and multiple regression. 
+Since in the former the coefficient is the average change in the response from a unit change in the predictor completely ignoring the other predictors. In the latter case, the coefficient is the average change in the response from a unit change in the predictor while holding the other predictor fixed.  
+```{r , echo=FALSE}
+lm.zn = lm(crim~zn)
+lm.indus = lm(crim~indus)
+lm.chas = lm(crim~chas) 
+lm.nox = lm(crim~nox)
+lm.rm = lm(crim~rm)
+lm.age = lm(crim~age)
+lm.dis = lm(crim~dis)
+lm.rad = lm(crim~rad)
+lm.tax = lm(crim~tax)
+lm.ptratio = lm(crim~ptratio)
+lm.black = lm(crim~black)
+lm.lstat = lm(crim~lstat)
+lm.medv = lm(crim~medv)
+lm.all = lm(crim~., data=Boston)
+x = c(coefficients(lm.zn)[2],
+      coefficients(lm.indus)[2],
+      coefficients(lm.chas)[2],
+      coefficients(lm.nox)[2],
+      coefficients(lm.rm)[2],
+      coefficients(lm.age)[2],
+      coefficients(lm.dis)[2],
+      coefficients(lm.rad)[2],
+      coefficients(lm.tax)[2],
+      coefficients(lm.ptratio)[2],
+      coefficients(lm.black)[2],
+      coefficients(lm.lstat)[2],
+      coefficients(lm.medv)[2])
+y = coefficients(lm.all)[2:14]
+plot(x, y)
+```
+(d) We can find evidence of a non-linear association, cubic type, between INDUS, NOX, AGE, DIS, PTRATIO and MEDV.
+```{r , echo=FALSE}
+lm.zn = lm(crim~poly(zn,3))
+summary(lm.zn)
+lm.indus = lm(crim~poly(indus,3))
+summary(lm.indus)
+lm.nox = lm(crim~poly(nox,3))
+summary(lm.nox)
+lm.rm = lm(crim~poly(rm,3))
+summary(lm.rm)
+lm.age = lm(crim~poly(age,3))
+summary(lm.age)
+lm.dis = lm(crim~poly(dis,3))
+summary(lm.dis)
+lm.rad = lm(crim~poly(rad,3))
+summary(lm.rad)
+lm.tax = lm(crim~poly(tax,3))
+summary(lm.tax)
+lm.ptratio = lm(crim~poly(ptratio,3))
+summary(lm.ptratio)
+lm.black = lm(crim~poly(black,3))
+summary(lm.black)
+lm.lstat = lm(crim~poly(lstat,3))
+summary(lm.lstat)
+lm.medv = lm(crim~poly(medv,3))
+summary(lm.medv)
 ```
 
 ### Chapter 6: #9
- Test
-```{r pressure, echo=FALSE}
-
+(a) set.seed(1)  
+Functions:  sample
+```{r , echo=FALSE}
+library(ISLR)
+library(glmnet)
+data(College)
+set.seed(3)
+train.size = nrow(College)/2
+train = sample(1:nrow(College), train.size)
+test = (-train)
+College.train = College[train, ]
+College.test = College[test, ]
 ```
+
+(b) Test error is 1246301  
+Functions: lm  
+```{r , echo=FALSE}
+lm.fit = lm(Apps~., data=College.train)
+lm.pred = predict(lm.fit, College.test)
+mean((College.test[, "Apps"] - lm.pred)^2)
+```
+
+(c) lambda: 18.74; MSE: 1608859  
+Functions: model.matrix, cv.glmnet
+```{r , echo=FALSE}
+train.mat = model.matrix(Apps~., data=College.train)
+test.mat = model.matrix(Apps~., data=College.test)
+grid = 10 ^ seq(4, -2, length=100)
+mod.ridge = cv.glmnet(train.mat, College.train[, "Apps"], alpha=0, lambda=grid, thresh=1e-12)
+lambda.best = mod.ridge$lambda.min
+lambda.best
+
+ridge.pred = predict(mod.ridge, newx=test.mat, s=lambda.best)
+mean((College.test[, "Apps"] - ridge.pred)^2)
+```
+
+(d) lambda: 21.54; MSE: 1135660  
+```{r , echo=FALSE}
+mod.lasso = cv.glmnet(train.mat, College.train[, "Apps"], alpha=1, lambda=grid, thresh=1e-12)
+lambda.best = mod.lasso$lambda.min
+lambda.best
+lasso.pred = predict(mod.lasso, newx=test.mat, s=lambda.best)
+mean((College.test[, "Apps"] - lasso.pred)^2)
+mod.lasso = glmnet(model.matrix(Apps~., data=College), College[, "Apps"], alpha=1)
+predict(mod.lasso, s=lambda.best, type="coefficients")
+```
+
+(e) MSE: 1723100  
+Functions: pcr
+```{r , echo=FALSE}
+library(pls)
+pcr.fit = pcr(Apps~., data=College.train, scale=T, validation="CV")
+validationplot(pcr.fit, val.type="MSEP")
+pcr.pred = predict(pcr.fit, College.test, ncomp=10)
+mean((College.test[, "Apps"] - pcr.pred)^2)
+```
+
+(f) MSE: 1131661  
+Functions: plsr  
+```{r , echo=FALSE}
+pls.fit = plsr(Apps~., data=College.train, scale=T, validation="CV")
+validationplot(pls.fit, val.type="MSEP")
+pls.pred = predict(pls.fit, College.test, ncomp=10)
+mean((College.test[, "Apps"] - pls.pred)^2)
+```
+
+(g) Based on the R square,  
+```{r , echo=FALSE}
+```
+
+### Chapter 6: #11
+
+(a) 
+Best subset selection: MSE - 50.43627  
+The best model is the one contains 9 variables.  
+Functions: regsubsets()  
+```{r , echo=FALSE}
+library (leaps)
+set.seed (1)
+train=sample (c(TRUE ,FALSE), nrow(Boston),rep=TRUE)
+test =(! train )
+Boston.train = Boston[train, ]
+Boston.test = Boston[test, ]
+train.mat = model.matrix(crim~., data=Boston.train)
+test.mat = model.matrix(crim~., data=Boston.test)
+y <- Boston.train$crim
+
+regfit.best=regsubsets(crim~.,data=Boston.train, nvmax =13)
+val.errors =rep(NA ,13)
+for(i in 1:13){
+  coefi=coef(regfit.best ,id=i)
+  pred=test.mat [,names(coefi)]%*% coefi
+  val.errors [i]= mean((Boston.test[, "crim"]-pred)^2)
+}
+val.errors
+which.min (val.errors)
+min (val.errors)
+```
+
+Lasso: lambda - 0.02608302; MSE - 50.75568  
+Functions: cv.glmnet()
+```{r , echo=FALSE}
+cv.out <- cv.glmnet(train.mat, y, alpha = 1, type.measure = "mse")
+lambda.best = cv.out$lambda.min
+lambda.best
+lasso.pred = predict(cv.out, newx=test.mat, s=lambda.best)
+mean((Boston.test[, "crim"] - lasso.pred)^2)
+plot(cv.out)
+```
+
+Ridge: lambda - 0.5240686; MSE - 51.46284  
+Functions: cv.glmnet()  
+```{r , echo=FALSE}
+cv.out <- cv.glmnet(train.mat, y, alpha = 0, type.measure = "mse")
+lambda.best = cv.out$lambda.min
+lambda.best
+lasso.pred = predict(cv.out, newx=test.mat, s=lambda.best)
+mean((Boston.test[, "crim"] - lasso.pred)^2)
+plot(cv.out)
+```
+
+PCR: MSE - 51.68033  
+Functions: pcr()  
+```{r , echo=FALSE}
+pcr.fit <- pcr(crim ~ ., data = Boston, scale = TRUE, validation = "CV")
+validationplot(pcr.fit, val.type = "MSEP")
+pcr.pred = predict(pcr.fit, Boston.test, ncomp=10)
+mean((Boston.test[, "crim"] - pcr.pred)^2)
+```
+(b) Best subset selection method has the lowest cross-validation error, which is 50.43627.
+
+(c) No, the model chosen by the best subset selection method has only 9 predictors.
+
+### Chapter 4: #10
+(a) As one would expect, the correlations between the lag variables and today’s returns are close to zero. In other words, there appears to be little correlation between today’s returns and previous days’ returns. The only substantial correlation is between Year and Volume. By plotting the data we see that Volume is increasing over time.  
+Functions: summary(), cor () 
+```{r , echo=FALSE}
+library(ISLR)
+summary(Weekly)
+cor(Weekly[, -9])
+attach(Weekly)
+plot(Volume)
+```
+
+(b)  
+Functions: The smallest p-value here is associated with Lag2. The positive coefficient for this predictor suggests that if the market had a positive return yesterday, then it is more likely to go up today.  
+Functions: glm() 
+```{r , echo=FALSE}
+glm.fit=glm(Direction∼Lag1+Lag2+Lag3+Lag4+Lag5+Volume, data=Weekly ,family =binomial)
+summary (glm.fit)
+```
+
+(c) The diagonal elements of the confusion matrix indicate correct predictions, while the off-diagonals represent incorrect predictions. Hence our model correctly predicted that the market would go up on 557 days and that it would go down on 54 days, for a total of 557 + 54 = 611 correct predictions. Correct rate: 56.10652%
+predictions.  
+Functions: table() 
+```{r , echo=FALSE}
+probs <- predict(glm.fit, type = "response")
+glm.pred <- rep("Down", length(probs))
+glm.pred[probs > 0.5] <- "Up"
+table(glm.pred, Direction)
+mean(glm.pred== Direction)
+```
+
+(d) Our model correctly predicted that the market would go up on 56 days and that it would go down on 9 days, for a total of 56 + 9 = 65 correct predictions. Correct rate: 62.5%  
+Functions: glm()   
+```{r , echo=FALSE}
+train = (Year < 2009)
+Weekly.20092010 <- Weekly[!train, ]
+Direction.20092010 <- Direction[!train]
+fit.glm2 <- glm(Direction ~ Lag2, data = Weekly, family = binomial, subset = train)
+summary(fit.glm2)
+
+probs2 <- predict(fit.glm2, Weekly.20092010, type = "response")
+pred.glm2 <- rep("Down", length(probs2))
+pred.glm2[probs2 > 0.5] <- "Up"
+table(pred.glm2, Direction.20092010)
+mean(pred.glm2 == Direction.20092010)
+```
+
+(g) Our model correctly predicted that the market would go up on 31 days and that it would go down on 21 days, for a total of 21 + 31 = 52 correct predictions. Correct rate: 50%  
+Functions: knn() k=1
+```{r , echo=FALSE}
+library(class)
+train.X <- as.matrix(Lag2[train])
+test.X <- as.matrix(Lag2[!train])
+train.Direction <- Direction[train]
+set.seed(1)
+pred.knn <- knn(train.X, test.X, train.Direction, k = 1)
+table(pred.knn, Direction.20092010)
+mean(pred.knn == Direction.20092010)
+```
+(h) Logistic regression has better test correction rate than KNN.
+
+(i) The results have improved slightly. But increasing K further turns out to provide no further improvements. It appears that for this data, logistic regression provides the best results of the methods that we have examined so far.  
+
+KNN k =10  
+```{r , echo=FALSE}
+library(class)
+pred.knn2 <- knn(train.X, test.X, train.Direction, k = 10)
+table(pred.knn2, Direction.20092010)
+mean(pred.knn2 == Direction.20092010)
+```
+KNN k =100  
+```{r , echo=FALSE}
+library(class)
+pred.knn3 <- knn(train.X, test.X, train.Direction, k = 100)
+table(pred.knn3, Direction.20092010)
+mean(pred.knn3 == Direction.20092010)
+```
+
+### Chapter 8: #8 
+(a) train = sample(1:nrow(Carseats), nrow(Carseats) / 2)
+```{r , echo=FALSE}
+library(ISLR)
+set.seed(3)
+train <- sample(1:nrow(Carseats), nrow(Carseats) / 2)
+Carseats.train <- Carseats[train, ]
+Carseats.test <- Carseats[-train, ]
+```
+
+(b) MSE: 4.784151  
+Functions: tree(), plot(), text()  
+```{r , echo=FALSE}
+library(tree)
+tree.carseats <- tree(Sales ~ ., data = Carseats.train)
+summary(tree.carseats)
+plot(tree.carseats)
+text(tree.carseats, pretty = 0)
+yhat <- predict(tree.carseats, newdata = Carseats.test)
+mean((yhat - Carseats.test$Sales)^2)
+```
+
+(C) In this case, the tree of size 8 is selected by cross-validation. Pruning the tree increases the MSE.
+MSE: 5.075903  
+Functions: cv.tree(), prune.tree()  
+```{r , echo=FALSE}
+cv.carseats <- cv.tree(tree.carseats)
+plot(cv.carseats$size, cv.carseats$dev, type = "b")
+tree.min <- which.min(cv.carseats$dev)
+points(tree.min, cv.carseats$dev[tree.min], col = "red", cex = 2, pch = 20)
+prune.carseats <- prune.tree(tree.carseats, best = 8)
+plot(prune.carseats)
+text(prune.carseats, pretty = 0)
+yhat <- predict(prune.carseats, newdata = Carseats.test)
+mean((yhat - Carseats.test$Sales)^2)
+```
+
+(d) Bagging improves the test MSE to 2.79. We also see that Price, ShelveLoc and Age are three most important predictors of Sale.  
+MSE: 2.795264  
+Functions: randomForest(), importance()  
+```{r , echo=FALSE}
+library (randomForest)
+bag.carseats <- randomForest(Sales ~ ., data = Carseats.train, mtry = 10, ntree = 500, importance = TRUE)
+yhat.bag <- predict(bag.carseats, newdata = Carseats.test)
+mean((yhat.bag - Carseats.test$Sales)^2)
+
+importance(bag.carseats)
+```
+
+(e) Random forest worsen the test MSE to 3.4. We again see that Price and ShelveLoc are two most important predictors of Sale.  
+MSE: 3.400033  
+Functions: randomForest(), importance()  
+```{r , echo=FALSE}
+rf.carseats <- randomForest(Sales ~ ., data = Carseats.train, mtry = 3, ntree = 500, importance = TRUE)
+yhat.rf <- predict(rf.carseats, newdata = Carseats.test)
+mean((yhat.rf - Carseats.test$Sales)^2)
+
+importance(rf.carseats)
+```
+
+### Chapter 8: #11
+
+(a) Caravan$Purchase = ifelse(Caravan$Purchase == "Yes", 1, 0)
+```{r , echo=FALSE}
+library (gbm)
+train <- 1:1000
+Caravan$Purchase <- ifelse(Caravan$Purchase == "Yes", 1, 0)
+Caravan.train <- Caravan[train, ]
+Caravan.test <- Caravan[-train, ]
+```
+
+(b) The variables “PPERSAUT” and “MKOOPKLA” are the two most important variables.  
+Functions: gbm()  
+```{r , echo=FALSE}
+set.seed(3)
+boost.caravan = gbm(Purchase∼.,data=Caravan.train, distribution ="bernoulli",n.trees =1000, shrinkage = 0.01)
+summary(boost.caravan)
+```
+
+(C) About 22.07% of people predicted to make purchase actually end up making one. 
+For logistic regression, the fraction of people predicted to make a purchase that in fact make one is again 22.07%.
+```{r , echo=FALSE}
+probs.test <- predict(boost.caravan, Caravan.test, n.trees = 1000, type = "response")
+pred.test <- ifelse(probs.test > 0.2, 1, 0)
+print('Boosting')
+table(Caravan.test$Purchase, pred.test)
+34/154
+logit.caravan <- glm(Purchase ~ ., data = Caravan.train, family = "binomial")
+probs.test2 <- predict(logit.caravan, Caravan.test, type = "response")
+pred.test2 <- ifelse(probs.test > 0.2, 1, 0)
+print('Logistic Regression')
+table(Caravan.test$Purchase, pred.test2)
+34/154
+```
+
+## Problem 1: Beauty Pays!
+
+## Problem 4: BART 
+```{r , echo=FALSE}
+```
+## Problem 5: Neural Nets
+```{r , echo=FALSE}
+```
+
